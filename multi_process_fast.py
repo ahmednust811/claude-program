@@ -219,9 +219,9 @@ def main():
                         results[key] = {'ADDID':"",'count':0,'off_set':[],'time_start':[],'time_end':[],'Radio_Station':[],'DDate':""}
                         
                     channel_name,date,start_t = rec.split("_")
-                    start_time = [int(start_t[:2]),int(start_t[2:4]),int(start_t[4:6])]
-                    #date,time = date_time()
-                    #start_time= [int(x) for x in time.split(':')]
+                    #start_time = [int(start_t[:2]),int(start_t[2:4]),int(start_t[4:6])]
+                    date,time = date_time()
+                    start_time= [int(x) for x in time.split(':')]
                     
                     with concurrent.futures.ProcessPoolExecutor() as executor:
                         data = executor.map(read,[to_check+"//"+rec+".mp3"])
