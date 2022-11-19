@@ -169,7 +169,7 @@ def analyse_audios(function_inputs,keys,l):
 def main():    
    
 
-    recording_direct ="C:" #"C://inetpub//wwwroot//Themediatree"    #C:
+    recording_direct ="C:" #"C://inetpub//wwwroot//Themediatree"    #C://add the directory you want
     while(1):
         directory_array = [x for x in os.listdir(recording_direct+"//radiodetectionpilot")]
         if len(directory_array) > 0:
