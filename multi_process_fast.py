@@ -262,12 +262,14 @@ def main():
                     df= df[df['count'] != 0]
                     new_order = [2,0,3,6,5,1,4]
                     df = df[df.columns[new_order]]
+                    ########################################################################################
                     #convert_dic = {'time_start':str}
                     #df.astype(convert_dic)
                     df['time_start']=df['time_start'].apply(str)
                     #copies = df.duplicated(subset=['time_start'],keep = False)
                     print("same values in ")
                     print(df.loc[df.duplicated(subset=['time_start'],keep = False),['time_start','time_end']])
+                    ##########################################################################################
                     print("data frame \n")
                     print(df)
 
