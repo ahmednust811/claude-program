@@ -158,16 +158,10 @@ def analyse_audios(function_inputs,keys,l):
             results[f'{keys}']['time_end'].append(f'{(e_h):02d}'+':'+f'{(e_m):02d}'+':'+f'{(e_s):02d}')
             #results[f'{keys}']['time_end'].join(",")
             results[f'{keys}']['time_start'].append(f'{(s_h):02d}'+':'+f'{(s_m):02d}'+':'+f'{(s_s):02d}')
-<<<<<<< Updated upstream
-            
-            
-            
-=======
             #results[f'{keys}']['time_start'].join(",")
             #results[f'{keys}']['time_end'].rstrip(results[f'{keys}']['time_end'][-1])
             #results[f'{keys}']['time_start'].rstrip(results[f'{keys}']['time_start'][-1])
             #move the window forwrd the length of advertisement if detected
->>>>>>> Stashed changes
             i = i+len_sample - int(offset*sample_rate)    
         else:
             #error=np.append(error,np.std(norm_corr))       
@@ -261,10 +255,6 @@ def main():
                     results = dict(l)
                     #print(type(results))
                     
-<<<<<<< Updated upstream
-                    
-=======
->>>>>>> Stashed changes
                     df = pd.DataFrame(data=results)
                     ##df.index.name ='ADDID'
                     df = df.T
