@@ -20,6 +20,7 @@ from email.message import EmailMessage
 from datetime import datetime
 from multiprocessing import freeze_support, Process,Manager
 import sklearn.preprocessing as normal
+from itertools import chain
 
 file_mp3 = 1
 
@@ -155,10 +156,18 @@ def analyse_audios(function_inputs,keys,l):
             e_h,e_m,e_s = time_limiters(e_h,e_m,e_s)
             
             results[f'{keys}']['time_end'].append(f'{(e_h):02d}'+':'+f'{(e_m):02d}'+':'+f'{(e_s):02d}')
+            #results[f'{keys}']['time_end'].join(",")
             results[f'{keys}']['time_start'].append(f'{(s_h):02d}'+':'+f'{(s_m):02d}'+':'+f'{(s_s):02d}')
+<<<<<<< Updated upstream
             
             
             
+=======
+            #results[f'{keys}']['time_start'].join(",")
+            #results[f'{keys}']['time_end'].rstrip(results[f'{keys}']['time_end'][-1])
+            #results[f'{keys}']['time_start'].rstrip(results[f'{keys}']['time_start'][-1])
+            #move the window forwrd the length of advertisement if detected
+>>>>>>> Stashed changes
             i = i+len_sample - int(offset*sample_rate)    
         else:
             #error=np.append(error,np.std(norm_corr))       
@@ -252,7 +261,10 @@ def main():
                     results = dict(l)
                     #print(type(results))
                     
+<<<<<<< Updated upstream
                     
+=======
+>>>>>>> Stashed changes
                     df = pd.DataFrame(data=results)
                     ##df.index.name ='ADDID'
                     df = df.T
@@ -260,9 +272,14 @@ def main():
                     df= df[df['count'] != 0]
                     new_order = [2,0,3,6,5,1,4]
                     df = df[df.columns[new_order]]
-                    
+                    convert_dic = {'time_start':str}
+                    df.astype(convert_dic)
+                    #copies = df.duplicated(subset=['time_start'],keep = False)
+                    print("same values in ")
+                    print(df['time_start'])
                     print("data frame \n")
                     print(df)
+
                     try:
                         conn = pyodbc.connect('Driver={SQL Server};'
                                             'Server=CLAUDEDEV2\SQLEXPRESS;'
