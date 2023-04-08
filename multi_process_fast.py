@@ -131,10 +131,26 @@ def analyse_audios(function_inputs,keys,l):
     print("\n"+"analyzing: "+ str(keys))
     while(i+len_sample <= len_recording):
         corr = signal.correlate(data_frame_samples[keys]['data'],recording_data[i:i+len_sample])
-        norm_corr = corr/corr.max() 
+        norm_corr = corr/corr.max()
+        
+        """
+        Safeer Modifications:
+
+        to remove multiple values of same comercail we are only counting it for one
+        and break right away as soon as count is one    
+        """
+
+        if (count >= 1):
+            break
+
+        # This above code is the only portion Of code I have added for our current problem
+
         if(np.std(norm_corr)<0.03):
             offset = (np.argmax(corr) - len(data_frame_samples[keys]['data']))/sample_rate
+ 
             count = count + 1
+
+            
             results[keys]['ADDID'] = (str(keys))
             results[f'{keys}']['count'] = count
             results[f'{keys}']['off_set'].append(int(offset))
@@ -178,8 +194,16 @@ def main():
     
     recording_direct = 'C://Users//Z004RJZU//Documents//GitHub//claude-program'
 
-    while(1):
+    # A temporary counter is created to only run the execution once 
+    # Exactely after the while loop the counter is zero
+    counter_temporary_for_testing = 1
+
+    while(counter_temporary_for_testing):
+    
+        counter_temporary_for_testing = 0
+
         directory_array = [x for x in os.listdir(recording_direct+"//radiodetectionpilot")]
+        
         if len(directory_array) > 0:
             for recording_directory in directory_array:
                 print("Analyzing commercials for Radio Statio ID: "+recording_directory)
@@ -248,6 +272,7 @@ def main():
                                           
                     list_procs = list()
                     l = Manager().dict() 
+
                     for keys in data_frame_samples:
                            
                         p = Process(target = analyse_audios,args = (function_inputs,keys,l))
@@ -267,6 +292,8 @@ def main():
                     df= df[df['count'] != 0]
                     new_order = [2,0,3,6,5,1,4]
                     df = df[df.columns[new_order]]
+                    df.to_excel("results_out_without_dub.xlsx")
+                    
                     ########################################################################################
                     #convert_dic = {'time_start':str}
                     #df.astype(convert_dic)
@@ -277,7 +304,7 @@ def main():
                     ##########################################################################################
                     print("data frame \n")
                     print(df)
-
+                    df.to_excel("results_out_dub.xlsx")
                     try:
                         conn = pyodbc.connect('Driver={SQL Server};'
                                             'Server=CLAUDEDEV2\SQLEXPRESS;'
