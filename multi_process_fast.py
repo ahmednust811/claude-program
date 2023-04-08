@@ -210,16 +210,20 @@ def main():
              
                 
                 #list of all the files in sample directory   
-                lr = [sample_directory for _ in list_sample_names]
+                #lr = [sample_directory for _ in list_sample_names]
                 # print(lr)
                 #multiprocess operation on load audios function
+                """"
                 with concurrent.futures.ProcessPoolExecutor() as executor:
                     data = executor.map(load_audios,list_sample_names,lr)
                     data_frame_samples={}
                 for datas in data:
                     #print(datas)
                     data_frame_samples={**data_frame_samples,**datas}
-            
+                """
+                data_frame_samples={}
+                for names in list_sample_names:
+                    data_frame_samples.update(load_audios(names,sample_directory))
                 error =[]
                 error = np.array(error)  
                 
@@ -235,14 +239,16 @@ def main():
                     #date,time = date_time()
                     #start_time= [int(x) for x in time.split(':')]
                     #multi process operation for reading the mp3 files
-                    with concurrent.futures.ProcessPoolExecutor() as executor:
-                        data = executor.map(read,[to_check+"//"+rec+".mp3"])
-                        
+                    #with concurrent.futures.ProcessPoolExecutor() as executor:
+                     #   data = executor.map(read,[to_check+"//"+rec+".mp3"])
+                    data = read(to_check+"//"+rec+".mp3")   
                     for test in data:
                         print(len(test))
                         sample_rate,recording_data = test
+                    
+                    results={}
                     #create an iterable for function inputs to multiprocess - needs optimization
-                    function_inputs = {"data_frame_samples": data_frame_samples,
+                    """function_inputs = {"data_frame_samples": data_frame_samples,
                                         "recording_data": recording_data,
                                         "sample_rate":sample_rate,
                                         "results": results,
@@ -264,6 +270,7 @@ def main():
                     #all the values from multi process are returned to the Manager
                     results = dict(l)
                     #print(type(results))
+                    """
                     
                     #convert dictionary into data frame
                     df = pd.DataFrame(data=results)
