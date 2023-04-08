@@ -169,10 +169,15 @@ def analyse_audios(function_inputs,keys,l):
 
                
     l.update({keys : results[keys]})
+
+
 def main():    
    
+    
+    #recording_direct ="C:" #"C://inetpub//wwwroot//Themediatree"    #C:
+    
+    recording_direct = 'C://Users//Z004RJZU//Documents//GitHub//claude-program'
 
-    recording_direct ="C:" #"C://inetpub//wwwroot//Themediatree"    #C:
     while(1):
         directory_array = [x for x in os.listdir(recording_direct+"//radiodetectionpilot")]
         if len(directory_array) > 0:
