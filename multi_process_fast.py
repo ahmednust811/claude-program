@@ -9,6 +9,12 @@ import concurrent.futures
 import os 
 import os.path
 from pydub import AudioSegment
+
+AudioSegment.converter = "C://Users\Safeer_Ahmad//Downloads//Compressed//ffmpeg//binffmpeg.exe"
+AudioSegment.ffmpeg = "C://Users\Safeer_Ahmad//Downloads//Compressed//ffmpeg//binffmpeg.exe"
+AudioSegment.ffprobe ="C://Users\Safeer_Ahmad//Downloads//Compressed//ffmpeg//binffmpeg.exe"
+
+
 import scipy.signal as signal
 import pandas as pd 
 import numpy as np
@@ -96,6 +102,9 @@ def secs_to_time(secs):
 """
 #load the audios of specific directory into a dictionary
 def load_audios(names,sample_directory):
+    # debugging print function
+    print ("In load_audios foulder \n", "names " ,  names, "\nsample_directory", sample_directory)
+    
     data_frame_samples ={}
     data_frame_samples[names]={'data':0,'sampling_rate':0}
     sample_rate,data = read(sample_directory+"\wav_out\\"+names+".mp3")
@@ -103,11 +112,12 @@ def load_audios(names,sample_directory):
     data_frame_samples[names]['sampling_rate'] = sample_rate
     print("\n"+f'{names} was loaded',end="\n")
     return data_frame_samples
+
 """
 #load the audios of specific directory into a dictionary
 def load_audios(names,sample_directory):
     # debugging print function
-    #print ("In load_audios foulder \n", "names " ,  names, "\nsample_directory", sample_directory)
+    print ("In load_audios foulder \n", "names " ,  names, "\nsample_directory", sample_directory)
     data_frame_samples ={}
     # another test code
     
@@ -311,7 +321,7 @@ def main():
                 
                 #list of all the files in sample directory   
                 lr = [sample_directory for _ in list_sample_names]
-                # print(lr)
+                for directory in lr: print (directory)
                 
                 ######################### Will be removing multiprocessing
                 """
@@ -329,7 +339,11 @@ def main():
                 """
                 for directory in lr:
                     #data = load_audios(list_sample_names, lr )
-                    data = load_audios(list_sample_names , lr )
+                    ###### Debug pass call
+                    pass
+                
+                
+                data = load_audios(list_sample_names , lr )
                     
 
                 # debugging print function
