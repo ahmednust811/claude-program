@@ -34,6 +34,9 @@ def read(f, normalized=True):
         return a.frame_rate, normal.minmax_scale(y,feature_range = (-1,1),copy = False)#np.float32(y) / 2**15
     else:
         return a.frame_rate, y
+    
+
+##################################### Does not required this function
 #function not implemented but send the email to the email adress
 def send_email():
     msg = EmailMessage()
@@ -89,6 +92,8 @@ def secs_to_time(secs):
     seconds = minutes_f * 60
     return (int(hours),int(minutes),int(seconds))
 
+########## my working function is below
+"""
 #load the audios of specific directory into a dictionary
 def load_audios(names,sample_directory):
     data_frame_samples ={}
@@ -98,6 +103,24 @@ def load_audios(names,sample_directory):
     data_frame_samples[names]['sampling_rate'] = sample_rate
     print("\n"+f'{names} was loaded',end="\n")
     return data_frame_samples
+"""
+#load the audios of specific directory into a dictionary
+def load_audios(names,sample_directory):
+    # debugging print function
+    #print ("In load_audios foulder \n", "names " ,  names, "\nsample_directory", sample_directory)
+    data_frame_samples ={}
+    # another test code
+    
+    # adding for loop for test
+    for count in range (len (names)):
+        data_frame_samples[names[count]]={'data':0,'sampling_rate':0}
+        sample_rate,data = read(sample_directory[count]+"\wav_out\\"+names[count]+".mp3")
+        data_frame_samples[names[count]]['data'] = data 
+        data_frame_samples[names[count]]['sampling_rate'] = sample_rate
+    print("\n"+f'{names} was loaded',end="\n")
+    return data_frame_samples
+
+
 #for time stamping to change the time 
 def time_limiters(hours,minutes,seconds):
     
@@ -110,6 +133,9 @@ def time_limiters(hours,minutes,seconds):
         minutes = minutes -60
         hours = hours +f_hs
     return(hours,minutes,seconds)
+
+# changing to my function
+""" 
 #analyse the audios
 def analyse_audios(function_inputs,keys,l):
     data_frame_samples  = function_inputs["data_frame_samples"]
@@ -173,15 +199,85 @@ def analyse_audios(function_inputs,keys,l):
 
     #update the dictionary using list comprehension           
     l.update({keys : results[keys]})
+""" 
+
+#analyse the audios
+def analyse_audios(function_inputs,keys,l):
+    data_frame_samples  = function_inputs["data_frame_samples"]
+    recording_data = function_inputs["recording_data"]
+    results = function_inputs["results"]
+    sample_rate = function_inputs["sample_rate"]
+    date = function_inputs["date"]
+    channel_name = function_inputs["channel_name"]
+    start_time = function_inputs["start_time"]
+    #error =[]
+    #error = np.array(error) 
+
+    #for keys in data_frame_samples:
+    #load length of recording window data and sample that is loaded
+    len_recording = len(recording_data)
+    len_sample = len(data_frame_samples[keys]['data'])
+    i = 0;
+    count = 0;
+    print("\n"+"analyzing: "+ str(keys))
+    #pass through the arrays in a sweeping window
+    while(i+len_sample <= len_recording):
+        #calculate the correlation betweem the window and the advertisement to be analyzed
+        corr = signal.correlate(data_frame_samples[keys]['data'],recording_data[i:i+len_sample])
+        #normalize the correlation for easy manipulation
+        norm_corr = corr/corr.max() 
+        #threshold to decide and time stamp the advertisement, it looks at the standard deviation
+        #of correlation between to be detected and saved advertisement
+        if(np.std(norm_corr)<0.03):
+            offset = (np.argmax(corr) - len(data_frame_samples[keys]['data']))/sample_rate
+            count = count + 1
+            results[keys]['ADDID'] = (str(keys))
+            results[f'{keys}']['count'] = count
+            results[f'{keys}']['off_set'] = (int(offset))
+            results[f'{keys}']['Radio_Station'] = channel_name
+            results[f'{keys}']['DDate'] = date
+            
+            start_seconds = int((i/sample_rate)-offset)
+            end_seconds= int(((i+len_sample)/sample_rate)-offset)
+            start_seconds = secs_to_time(start_seconds)
+            end_seconds = secs_to_time(end_seconds)
+            s_h = start_seconds[0]+start_time[0]
+            s_m = start_seconds[1]+start_time[1]
+            s_s = start_seconds[2]+start_time[2]
+            s_h,s_m,s_s = time_limiters(s_h,s_m,s_s)
+
+            e_h= end_seconds[0]+start_time[0]
+            e_m = end_seconds[1]+start_time[1]
+            e_s = end_seconds[2]+start_time[2]
+            e_h,e_m,e_s = time_limiters(e_h,e_m,e_s)
+            
+            results[f'{keys}']['time_end'] = (f'{(e_h):02d}'+':'+f'{(e_m):02d}'+':'+f'{(e_s):02d}')
+            results[f'{keys}']['time_start'] = (f'{(s_h):02d}'+':'+f'{(s_m):02d}'+':'+f'{(s_s):02d}')
+            
+            
+            #move the window forwrd the length of advertisement if detected
+            i = i+len_sample - int(offset*sample_rate)    
+        else:
+            #error=np.append(error,np.std(norm_corr))
+            # move full length window forward as no ad was detected        
+            i = i+len_sample
+
+    #update the dictionary using list comprehension           
+    l.update({keys : results[keys]})
+
 def main():    
    
     #variable fot the directory of advertisements
-    recording_direct ="C:" #"C://inetpub//wwwroot//Themediatree"    #C://add the directory you want
+    #recording_direct = "C:" #"C://inetpub//wwwroot//Themediatree"    #C://add the directory you want
+    # temporary variable for Safeer User. Please change it
+    recording_direct ="C://Users//Safeer_Ahmad//Documents//Github//claude-program"
+    
     while(1):
         #create a list of items in the directory
         directory_array = [x for x in os.listdir(recording_direct+"//radiodetectionpilot")]
         #if nothing in the directory then wait for 1minute so it can be populated
         if len(directory_array) > 0:
+            
             for recording_directory in directory_array:
                 print("Analyzing commercials for Radio Statio ID: "+recording_directory)
                 date_time()
@@ -191,14 +287,18 @@ def main():
                 to_check = recording_direct+"//"+"radiodetectionpilot"+"//"+recording_directory+"//"+"recordings"+"//"+"wav_out"
                 #check the directory for mp3 extension files
                 wav_check = [f for f in os.listdir(to_check) if f.endswith('.mp3')]
+                
                 if not wav_check:
                     print("\n nothing in "+ recording_directory + " folder  \n")
                     TIME.sleep(10)
                     continue
+                
                 #check for sample commercials
                 sample_directory = recording_direct+"//"+"radiodetectionpilot"+"//"+recording_directory+"//"+"sample commercials"       
                 list_sample_names_mp3= [os.path.splitext(x)[0] for x in os.listdir(sample_directory) if x.endswith(".mp3")]
                 list_sample_names =[os.path.splitext(x)[0] for x in os.listdir(sample_directory+"//wav_out") if x.endswith(".mp3")]
+                
+                
                 if not (list_sample_names or list_sample_names_mp3):
                     print("\n nothin in sample commercial directory \n")
                     TIME.sleep(10)
@@ -212,17 +312,29 @@ def main():
                 #list of all the files in sample directory   
                 lr = [sample_directory for _ in list_sample_names]
                 # print(lr)
+                
+                ######################### Will be removing multiprocessing
+                """
                 #multiprocess operation on load audios function
                 with concurrent.futures.ProcessPoolExecutor() as executor:
                     data = executor.map(load_audios,list_sample_names,lr)
                     data_frame_samples={}
+        
                 for datas in data:
                     #print(datas)
                     data_frame_samples={**data_frame_samples,**datas}
             
                 error =[]
                 error = np.array(error)  
-                
+                """
+                for directory in lr:
+                    #data = load_audios(list_sample_names, lr )
+                    data = load_audios(list_sample_names , lr )
+                    
+
+                # debugging print function
+                print ("in main \n data ", data , type (data))
+                    
                 for rec in recording_wav:
                     
                     results ={}
@@ -235,12 +347,30 @@ def main():
                     #date,time = date_time()
                     #start_time= [int(x) for x in time.split(':')]
                     #multi process operation for reading the mp3 files
+                    
+                    ########################### Parallism function
+                    """
                     with concurrent.futures.ProcessPoolExecutor() as executor:
                         data = executor.map(read,[to_check+"//"+rec+".mp3"])
-                        
+                    """
+                    
+                    # debugging print
+                    print (" parameter of read function is  " + to_check+"//"+rec+".mp3" )
+                    data = read (to_check+"//"+rec+".mp3")
+                    
+                    #debugginf print
+                    print ('in main \n data after read function is ', data)
+
+                    ########################################
+                    #commenting out this for loop for debugging purposes
+                    """
                     for test in data:
                         print(len(test))
                         sample_rate,recording_data = test
+                    """
+                    
+                    sample_rate,recording_data = data
+                    
                     #create an iterable for function inputs to multiprocess - needs optimization
                     function_inputs = {"data_frame_samples": data_frame_samples,
                                         "recording_data": recording_data,
@@ -249,17 +379,33 @@ def main():
                                         "channel_name": channel_name,
                                         "start_time":start_time,
                                         "date":date}
-                                          
+                    
+                    """                      
                     list_procs = list()
                     l = Manager().dict() 
+                    """
+                    
+                    ############# Last instance of parallism
+                    # Remove it in production
+                    """
                     for keys in data_frame_samples:
                         #create multi process operation manually   
                         p = Process(target = analyse_audios,args = (function_inputs,keys,l))
                         p.daemon =True
                         p.start()
                         list_procs.append(p)
+                        
+                        
                     for idx, w_procs in enumerate(list_procs):
                         w_procs.join()
+                    """
+                    
+                    for keys in data_frame_samples:
+                        #create multi process operation manually   
+                        ### p = Process(target = analyse_audios,args = (function_inputs,keys,l))
+                        pd = analyse_audios (function_inputs,keys,l)
+                        #p.daemon =True
+                    
                     #print(l)
                     #all the values from multi process are returned to the Manager
                     results = dict(l)
@@ -274,8 +420,13 @@ def main():
                     new_order = [2,0,3,6,5,1,4]
                     df = df[df.columns[new_order]]
                     
+                    
+                    
                     print("data frame \n")
                     print(df)
+                    
+                    ######################### these code will be deleted in execution. So commenting things out
+                    """
                     try:
                         conn = pyodbc.connect('Driver={SQL Server};'
                                             'Server=CLAUDEDEV2\SQLEXPRESS;'
@@ -303,6 +454,7 @@ def main():
                         conn.close()
                     except:
                         pass
+                    """
                     
                     
         else:
