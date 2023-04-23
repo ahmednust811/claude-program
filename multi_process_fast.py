@@ -333,7 +333,7 @@ def main():
                     
 
                 # debugging print function
-                print ("in main \n data ", data , type (data))
+                print ("in main \n data of load audios ", data , type (data))
                     
                 for rec in recording_wav:
                     
