@@ -9,12 +9,6 @@ import concurrent.futures
 import os 
 import os.path
 from pydub import AudioSegment
-
-AudioSegment.converter = "C://Users\Safeer_Ahmad//Downloads//Compressed//ffmpeg//binffmpeg.exe"
-AudioSegment.ffmpeg = "C://Users\Safeer_Ahmad//Downloads//Compressed//ffmpeg//binffmpeg.exe"
-AudioSegment.ffprobe ="C://Users\Safeer_Ahmad//Downloads//Compressed//ffmpeg//binffmpeg.exe"
-
-
 import scipy.signal as signal
 import pandas as pd 
 import numpy as np
@@ -317,11 +311,13 @@ def main():
                 
                 recording_wav = [os.path.splitext(y)[0] for y in os.listdir(to_check) if y.endswith(".mp3")]
                 
+                #debug print function
+                print ("in main 315 to_check ",to_check)
              
                 
                 #list of all the files in sample directory   
-                lr = [sample_directory for _ in list_sample_names]
-                for directory in lr: print (directory)
+                #lr = [sample_directory for _ in list_sample_names[0]]
+                #for directory in lr: print (directory)
                 
                 ######################### Will be removing multiprocessing
                 """
@@ -337,14 +333,25 @@ def main():
                 error =[]
                 error = np.array(error)  
                 """
-                for directory in lr:
-                    #data = load_audios(list_sample_names, lr )
-                    ###### Debug pass call
-                    pass
+                data_frame_samples={}
+                for names in list_sample_names:
+                    data_frame_samples.update(load_audios(names,sample_directory))
+                error =[]
+                error = np.array(error)  
+                
+                #### Debug print function
+                print ("In main the value of data_frame_samples\n", data_frame_samples)
                 
                 
-                data = load_audios(list_sample_names , lr )
-                    
+                #data = load_audios(list_sample_names , lr )
+                data = read(to_check+"//"+rec+".mp3")
+                
+                for test in data:
+                        print(len(test))
+                        sample_rate,recording_data = test
+                
+                # debugging print call
+                print ("Data is loaded sucessfully")
 
                 # debugging print function
                 print ("in main \n data of load audios ", data , type (data))
@@ -369,7 +376,7 @@ def main():
                     """
                     
                     # debugging print
-                    print (" parameter of read function is  " + to_check+"//"+rec+".mp3" )
+                    print (" \n\nparameter of read function is  " + to_check+"//"+rec+".mp3" )
                     data = read (to_check+"//"+rec+".mp3")
                     
                     #debugginf print
