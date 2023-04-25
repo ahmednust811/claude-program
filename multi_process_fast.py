@@ -312,11 +312,11 @@ def main():
                 recording_wav = [os.path.splitext(y)[0] for y in os.listdir(to_check) if y.endswith(".mp3")]
                 
                 #debug print function
-                print ("in main 315 to_check ",to_check)
+                print ("in main 315 to_check ",to_check, "\n------------\n",)
              
                 
                 #list of all the files in sample directory   
-                #lr = [sample_directory for _ in list_sample_names[0]]
+                lr = [sample_directory for _ in list_sample_names[0]]
                 #for directory in lr: print (directory)
                 
                 ######################### Will be removing multiprocessing
@@ -332,10 +332,18 @@ def main():
             
                 error =[]
                 error = np.array(error)  
-                """
+                
+                ### Old code, new code is right below
                 data_frame_samples={}
                 for names in list_sample_names:
                     data_frame_samples.update(load_audios(names,sample_directory))
+                """    
+                
+                data_frame_samples={}
+                for names in list_sample_names:
+                    data_frame_samples = load_audios(list_sample_names,lr)
+                    ##### debug print
+                    print ("In main data frame values are \n",data_frame_samples)
                 error =[]
                 error = np.array(error)  
                 
