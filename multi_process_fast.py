@@ -279,19 +279,38 @@ def main():
     while(1):
         #create a list of items in the directory
         directory_array = [x for x in os.listdir(recording_direct+"//radiodetectionpilot")]
+        
+        #########
+        # directory_array contains the list of all
+        # the folder(FM comercials) we are trying to detect
+        ############### Debugging Printing 
+        #print ("In main directory_array \n ", directory_array )
+        #break
+        
         #if nothing in the directory then wait for 1minute so it can be populated
         if len(directory_array) > 0:
             
             for recording_directory in directory_array:
                 print("Analyzing commercials for Radio Statio ID: "+recording_directory)
                 date_time()
-               
-                #print("")
                 
+                ################# debug print
+                #print("In main recording_directory ", recording_directory)
+                # break
+            
+                # Drirectory of FM stream audio
                 to_check = recording_direct+"//"+"radiodetectionpilot"+"//"+recording_directory+"//"+"recordings"+"//"+"wav_out"
                 #check the directory for mp3 extension files
-                wav_check = [f for f in os.listdir(to_check) if f.endswith('.mp3')]
+                ################# debug print
+                print("In main to_check ", to_check)
+                break
                 
+                wav_check = [f for f in os.listdir(to_check) if f.endswith('.mp3')]
+                ################# debug print
+                print("In main wav_check ", wav_check)
+                break
+                
+            
                 if not wav_check:
                     print("\n nothing in "+ recording_directory + " folder  \n")
                     TIME.sleep(10)
