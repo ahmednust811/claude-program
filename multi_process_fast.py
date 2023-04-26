@@ -3,6 +3,10 @@
 Created on Mon Aug  2 15:13:50 2021
 
 @author: Ahmed
+
+Modefied by Safeer Ahmad
+Patch1:
+Isolate the results from each other and save them individually
 """
 #!/usr/bin/env python3
 import concurrent.futures
@@ -112,6 +116,10 @@ def time_limiters(hours,minutes,seconds):
         hours = hours +f_hs
     return(hours,minutes,seconds)
 
+
+#global dataframe for testing purposes
+global_df = pd.DataFrame ( columns= ["ADDID", "count", 'off_set', 'Radio_Station','DDate','time_start','time_end'])
+
 def analyse_audios(function_inputs,keys,l):
     data_frame_samples  = function_inputs["data_frame_samples"]
     recording_data = function_inputs["recording_data"]
@@ -120,6 +128,8 @@ def analyse_audios(function_inputs,keys,l):
     date = function_inputs["date"]
     channel_name = function_inputs["channel_name"]
     start_time = function_inputs["start_time"]
+
+    global global_df
     #error =[]
     #error = np.array(error) 
 
@@ -140,8 +150,8 @@ def analyse_audios(function_inputs,keys,l):
         and break right away as soon as count is one    
         """
 
-        if (count >= 1):
-            break
+        #if (count >= 1):
+        #    break
 
         # This above code is the only portion Of code I have added for our current problem
 
@@ -153,7 +163,6 @@ def analyse_audios(function_inputs,keys,l):
             
             results[keys]['ADDID'] = (str(keys))
             results[f'{keys}']['count'] = count
-            results[f'{keys}']['off_set'].append(int(offset))
             results[f'{keys}']['Radio_Station'] = channel_name
             results[f'{keys}']['DDate'] = date
             
@@ -171,9 +180,27 @@ def analyse_audios(function_inputs,keys,l):
             e_s = end_seconds[2]+start_time[2]
             e_h,e_m,e_s = time_limiters(e_h,e_m,e_s)
             
+            # removing append commands and for bug fixing
+            '''
+            results[f'{keys}']['off_set'].append(int(offset))
             results[f'{keys}']['time_end'].append(f'{(e_h):02d}'+':'+f'{(e_m):02d}'+':'+f'{(e_s):02d}')
-            #results[f'{keys}']['time_end'].join(",")
             results[f'{keys}']['time_start'].append(f'{(s_h):02d}'+':'+f'{(s_m):02d}'+':'+f'{(s_s):02d}')
+            '''
+            # Safeer Modefied version to remove bugs
+            results[f'{keys}']['off_set']    = (int(offset))
+            results[f'{keys}']['time_end']   = (f'{(e_h):02d}'+':'+f'{(e_m):02d}'+':'+f'{(e_s):02d}')
+            results[f'{keys}']['time_start'] = (f'{(s_h):02d}'+':'+f'{(s_m):02d}'+':'+f'{(s_s):02d}')
+           
+            global_df = global_df.append (results[f'{keys}'] , ignore_index= True )
+
+            # to remove over writing on same thread because of index problem reindexing the data frame
+            print ("In analysis audio function before reindex \n Global Data structure\n", global_df )
+            #global_df.reset_index(drop=True)
+            global_df.reindex(np.arange(0, len (global_df)))
+            ########################### End of Modefications #######################
+
+
+            #results[f'{keys}']['time_end'].join(",")
             #results[f'{keys}']['time_start'].join(",")
             #results[f'{keys}']['time_end'].rstrip(results[f'{keys}']['time_end'][-1])
             #results[f'{keys}']['time_start'].rstrip(results[f'{keys}']['time_start'][-1])
@@ -183,8 +210,12 @@ def analyse_audios(function_inputs,keys,l):
             #error=np.append(error,np.std(norm_corr))       
             i = i+len_sample
 
-               
-    l.update({keys : results[keys]})
+    print ("In analysis audio function\n Data structure\n", global_df )
+
+    # Commenting below to get results
+    # l.update({keys : results[keys]})
+    l.update(global_df)
+    
 
 
 def main():    
@@ -279,12 +310,24 @@ def main():
                         p.daemon =True
                         p.start()
                         list_procs.append(p)
+                        print ("**********************")
+                        print ('In last of main data frame\n Return from audio_func \n', p )
+
                     for idx, w_procs in enumerate(list_procs):
                         w_procs.join()
                     #print(l)
                     results = dict(l)
                     #print(type(results))
+
                     
+
+                    
+                    global global_df
+                    print ("**********************")
+                    print ('In last of main data frame \n', global_df )
+
+                    # commented the data frame of existing output
+                    '''
                     df = pd.DataFrame(data=results)
                     ##df.index.name ='ADDID'
                     df = df.T
@@ -305,6 +348,8 @@ def main():
                     print("data frame \n")
                     print(df)
                     df.to_excel("results_out_dub.xlsx")
+                    '''
+
                     try:
                         conn = pyodbc.connect('Driver={SQL Server};'
                                             'Server=CLAUDEDEV2\SQLEXPRESS;'
